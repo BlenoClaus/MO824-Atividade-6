@@ -893,7 +893,7 @@ public class GA_QBFPT extends AbstractGA<Integer, Integer> {
     public static void main(String[] args) throws IOException {
 
         long startTime = System.currentTimeMillis();
-        GA_QBFPT ga = new GA_QBFPT(5, 1000000, 400, 1.0 / 100.0, "instances/qbf400", GA_QBFPT.XOR_UNIFORM_CROSSOVER, GA_QBFPT.DEFAULT_MUTATION, true);
+        GA_QBFPT ga = new GA_QBFPT(5, 1000000, 200, 1.0 / 100.0, "instances/qbf200", GA_QBFPT.XOR_UNIFORM_CROSSOVER, GA_QBFPT.DEFAULT_MUTATION, true);
 
         Solution<Integer> bestSol = ga.solve();
         System.out.println("maxVal = " + bestSol);

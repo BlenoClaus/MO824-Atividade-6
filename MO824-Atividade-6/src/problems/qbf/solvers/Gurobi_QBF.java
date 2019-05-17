@@ -11,72 +11,72 @@ import problems.qbf.QBF;
 
 public class Gurobi_QBF {
 
-    public static GRBEnv env;
-    public static GRBModel model;
-    public GRBVar[] x;
-    public QBF problem;
+	public static GRBEnv env;
+	public static GRBModel model;
+	public GRBVar[] x;
+	public QBF problem;
 
-    public Gurobi_QBF(String filename) throws IOException {
-        this.problem = new QBF(filename);
-        System.loadLibrary("GurobiJni81");
-    }
+	public Gurobi_QBF(String filename) throws IOException {
+		this.problem = new QBF(filename);
+	}
 
-    public static void main(String[] args) throws IOException, GRBException {
+	public static void main(String[] args) throws IOException, GRBException {
+		
+		// instance name
+		Gurobi_QBF gurobi = new Gurobi_QBF("instances/qbf400");
+		
+		env = new GRBEnv("mip1.log");
+		model = new GRBModel(env);
+		
+		// execution time in seconds 
+		model.getEnv().set(GRB.DoubleParam.TimeLimit, 600.0);
 
-        // instance name
-        Gurobi_QBF gurobi = new Gurobi_QBF("instances/qbf400");
+		
+		// generate the model
+		gurobi.populateNewModel(model);
 
-        env = new GRBEnv("mip1.log");
-        model = new GRBModel(env);
+		// write model to file
+		model.write("model.lp");
 
-        // execution time in seconds 
-        model.getEnv().set(GRB.DoubleParam.TimeLimit, 600.0);
+		model.optimize();
 
-        // generate the model
-        gurobi.populateNewModel(model);
+		System.out.println("\n\nZ* = " + model.get(GRB.DoubleAttr.ObjVal));
+		
+		System.out.print("X = [");
+		for (int i = 0; i < gurobi.problem.size; i++) {
+	          System.out.print((gurobi.x[i].get(GRB.DoubleAttr.X)>0.5 ? 1.0 : 0) + ", ");
+		}
+		System.out.print("]");
 
-        // write model to file
-        model.write("model.lp");
+		model.dispose();
+		env.dispose();
 
-        model.optimize();
+	}
 
-        System.out.println("\n\nZ* = " + model.get(GRB.DoubleAttr.ObjVal));
+	private void populateNewModel(GRBModel model) throws GRBException {
 
-        System.out.print("X = [");
-        for (int i = 0; i < gurobi.problem.size; i++) {
-            System.out.print((gurobi.x[i].get(GRB.DoubleAttr.X) > 0.5 ? 1.0 : 0) + ", ");
-        }
-        System.out.print("]");
+		// variables
+		x = new GRBVar[problem.size];
 
-        model.dispose();
-        env.dispose();
+		for (int i = 0; i < problem.size; i++) {
+			x[i] = model.addVar(0, 1, 0.0f, GRB.BINARY, "x[" + i + "]");
+		}
+		model.update();
 
-    }
+		// objective functions
+		GRBQuadExpr obj = new GRBQuadExpr();
+		for (int i = 0; i < problem.size; i++) {
+			for (int j = i; j < problem.size; j++) {
+				obj.addTerm(problem.A[i][j], x[i], x[j]);
+			}
+		}
 
-    private void populateNewModel(GRBModel model) throws GRBException {
+		model.setObjective(obj);
+		model.update();
 
-        // variables
-        x = new GRBVar[problem.size];
+		// maximization objective function
+		model.set(GRB.IntAttr.ModelSense, -1);
 
-        for (int i = 0; i < problem.size; i++) {
-            x[i] = model.addVar(0, 1, 0.0f, GRB.BINARY, "x[" + i + "]");
-        }
-        model.update();
-
-        // objective functions
-        GRBQuadExpr obj = new GRBQuadExpr();
-        for (int i = 0; i < problem.size; i++) {
-            for (int j = i; j < problem.size; j++) {
-                obj.addTerm(problem.A[i][j], x[i], x[j]);
-            }
-        }
-
-        model.setObjective(obj);
-        model.update();
-
-        // maximization objective function
-        model.set(GRB.IntAttr.ModelSense, -1);
-
-    }
+	}
 
 }
