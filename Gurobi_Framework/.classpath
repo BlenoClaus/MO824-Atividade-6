@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="/home/ec2013/ra145444/gurobi7.0.2_linux64/gurobi702/linux64/lib/gurobi.jar"/>
-	<classpathentry kind="output" path="bin"/>
-</classpath>
