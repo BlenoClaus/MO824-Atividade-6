@@ -11,7 +11,6 @@ import solutions.Solution;
 /**
  * Class that executes the GA for MAXQBFPT problem
  *
- *
  * @author Cristina Bazzano
  * @author Jônatas Trabuco Belotti [jonatas.t.belotti@hotmail.com]
  * @author Matheus Diógenes Andrade
@@ -37,13 +36,13 @@ public class Main {
 
         outputCsv = "fileName,tamanhoPop,taxaMut,tipoCrossover,tipoMutacao,manutencaoDiversidade, solucao\n";
 
-        executeGA(1, 1D/100D, GA_QBFPT.XOR_UNIFORM_CROSSOVER, GA_QBFPT.DEFAULT_MUTATION, false); // CONF P -> Padrão
-        executeGA(2, 1D/100D, GA_QBFPT.XOR_UNIFORM_CROSSOVER, GA_QBFPT.DEFAULT_MUTATION, false); // CONF A -> Padrão + tamanho população alternativo
-        executeGA(1, 5D/100D, GA_QBFPT.XOR_UNIFORM_CROSSOVER, GA_QBFPT.DEFAULT_MUTATION, false); // CONF B -> Padrão + taxa mutação alternativa
-        executeGA(1, 1D/100D, GA_QBFPT.XOR_CROSSOVER, GA_QBFPT.DEFAULT_MUTATION, false); // CONF C -> Padrão + crossover XOR
-        executeGA(1, 1D/100D, GA_QBFPT.DEFAULT_CROSSOVER, GA_QBFPT.DEFAULT_MUTATION, false); // CONF D -> Padrão + crossover de 2 pontos
-        executeGA(1, 1D/100D, GA_QBFPT.XOR_UNIFORM_CROSSOVER, GA_QBFPT.DYNAMIC_MUTATION, false); // CONF E -> Padrão + Mutação adaptativa
-        executeGA(1, 1D/100D, GA_QBFPT.XOR_UNIFORM_CROSSOVER, GA_QBFPT.DEFAULT_MUTATION, true); // CONF F -> Padrão + Manutenção da diversidade
+        executeGA(1, 1D / 100D, GA_QBFPT.XOR_UNIFORM_CROSSOVER, GA_QBFPT.DEFAULT_MUTATION, false); // CONF P -> Padrão
+        executeGA(2, 1D / 100D, GA_QBFPT.XOR_UNIFORM_CROSSOVER, GA_QBFPT.DEFAULT_MUTATION, false); // CONF A -> Padrão + tamanho população alternativo
+        executeGA(1, 5D / 100D, GA_QBFPT.XOR_UNIFORM_CROSSOVER, GA_QBFPT.DEFAULT_MUTATION, false); // CONF B -> Padrão + taxa mutação alternativa
+        executeGA(1, 1D / 100D, GA_QBFPT.XOR_CROSSOVER, GA_QBFPT.DEFAULT_MUTATION, false); // CONF C -> Padrão + crossover XOR
+        executeGA(1, 1D / 100D, GA_QBFPT.DEFAULT_CROSSOVER, GA_QBFPT.DEFAULT_MUTATION, false); // CONF D -> Padrão + crossover de 2 pontos
+        executeGA(1, 1D / 100D, GA_QBFPT.XOR_UNIFORM_CROSSOVER, GA_QBFPT.DYNAMIC_MUTATION, false); // CONF E -> Padrão + Mutação adaptativa
+        executeGA(1, 1D / 100D, GA_QBFPT.XOR_UNIFORM_CROSSOVER, GA_QBFPT.DEFAULT_MUTATION, true); // CONF F -> Padrão + Manutenção da diversidade
 
         saveOutput("output.csv", outputCsv);
     }
@@ -65,7 +64,7 @@ public class Main {
             System.out.println("Execution:");
 
             long beginInstanceTime = System.currentTimeMillis();
-            
+
             GA_QBFPT ga = new GA_QBFPT(TIME_LIMIT, GENERATIONS_LIMIT, new QBF(arquivo).getDomainSize() * tamPop, taxaMuta, arquivo, tipoCrossover, tipoMutacao, manutencaoDiversidade);
             Solution<Integer> bestSolution = ga.solve();
             System.out.println(" maxVal = " + bestSolution);

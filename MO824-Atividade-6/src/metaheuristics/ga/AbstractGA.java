@@ -25,8 +25,8 @@ public abstract class AbstractGA<G extends Number, F> {
 
     @SuppressWarnings("serial")
     public class Population extends ArrayList<Chromosome<F>> {
-            }
-            
+    }
+
     /**
      * flag that indicates whether the code should print more information on
      * screen
@@ -398,7 +398,7 @@ public abstract class AbstractGA<G extends Number, F> {
             offsprings.remove(worse);
             offsprings.add(bestChromosome);
         }
-        
+
         return offsprings;
     }
 
