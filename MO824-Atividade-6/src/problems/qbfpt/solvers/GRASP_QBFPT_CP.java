@@ -1,11 +1,11 @@
-package problems.qbf.solvers;
+package problems.qbfpt.solvers;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import problems.qbf.solvers.GRASP_QBF;
-import problems.qbfpt.log.Log;
+import problems.qbf.solvers.GRASP_QBFPT;
 import solutions.Solution;
 
 
@@ -122,7 +122,7 @@ public class GRASP_QBFPT_CP extends GRASP_QBFPT {
 		long startTime = System.currentTimeMillis();
 		GRASP_QBF grasp;
 		try {
-			grasp = new GRASP_QBFPT_CP(0.2, 1000, "instances/qbf040", Boolean.TRUE);
+			grasp = new GRASP_QBFPT_CP(0.2, 1000, "instances/qbf100", Boolean.TRUE);
 			Solution<Integer> bestSol = grasp.solve();
 			System.out.println("maxVal = " + bestSol);
 			long endTime   = System.currentTimeMillis();
