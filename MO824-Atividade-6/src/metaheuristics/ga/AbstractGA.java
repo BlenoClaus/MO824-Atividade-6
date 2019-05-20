@@ -1,6 +1,7 @@
 package metaheuristics.ga;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import problems.Evaluator;
@@ -53,6 +54,8 @@ public abstract class AbstractGA<G extends Number, F> {
      * algoritmo.
      */
     protected Integer geracoesConvengencia;
+
+    protected List<Integer> alvos = null;
 
     /**
      * the size of the population
@@ -129,14 +132,13 @@ public abstract class AbstractGA<G extends Number, F> {
      *
      * @param objFunction The objective function being optimized.
      * @param tempoExecucao
-     * @param geracoesConvengencia
      * @param popSize Population size.
      * @param mutationRate The mutation rate.
      */
-    public AbstractGA(Evaluator<F> objFunction, Integer tempoExecucao, Integer geracoesConvengencia, Integer popSize, Double mutationRate, int crossoverType, int mutationType) {
+    public AbstractGA(Evaluator<F> objFunction, Integer tempoExecucao, List<Integer> alvos, Integer popSize, Double mutationRate, int crossoverType, int mutationType) {
         this.ObjFunction = objFunction;
         this.tempoExecucao = tempoExecucao;
-        this.geracoesConvengencia = geracoesConvengencia;
+        this.alvos = alvos;
         this.popSize = popSize;
         this.chromosomeSize = this.ObjFunction.getDomainSize();
         this.mutationRate = mutationRate;
@@ -157,19 +159,21 @@ public abstract class AbstractGA<G extends Number, F> {
     public Solution<F> solve() {
         long tempoInicial;
         int geracoesSemMelhora = 0;
+        List<Integer> alvos_ = new ArrayList<>(this.alvos);
+        
+        tempoInicial = System.currentTimeMillis();
 
         /* starts the initial population */
         Population population = initializePopulation();
 
         bestChromosome = getBestChromosome(population);
         bestSol = decode(bestChromosome);
-        System.out.println("(Gen. " + 0 + ") BestSol = " + bestSol);
+        verificarAlvos(alvos_, 0, tempoInicial, System.currentTimeMillis());
 
         /*
          * enters the main loop and repeats until a given number of generations
          */
-        tempoInicial = System.currentTimeMillis();
-        for (int g = 1; (((System.currentTimeMillis() - tempoInicial) / 1000D) / 60D) < this.tempoExecucao && (this.geracoesConvengencia < 1 || geracoesSemMelhora <= this.geracoesConvengencia); g++) {
+        for (int g = 1; (((System.currentTimeMillis() - tempoInicial) / 1000D) / 60D) < this.tempoExecucao && !alvos_.isEmpty(); g++) {
             geracoesSemMelhora++;
 
             Population parents = selectParents(population);
@@ -194,7 +198,14 @@ public abstract class AbstractGA<G extends Number, F> {
                 geracoesSemMelhora = 0;
             }
 
+            verificarAlvos(alvos_, g, tempoInicial, System.currentTimeMillis());
+
             this.endGenerationAction();
+        }
+        
+        // Caso não tenha chegado em algum alvo
+        for (Integer alvo : alvos_) {
+            System.out.println("Alvo: [" + alvo + "]");
         }
 
         return bestSol;
@@ -400,6 +411,18 @@ public abstract class AbstractGA<G extends Number, F> {
         }
 
         return offsprings;
+    }
+
+    private void verificarAlvos(List<Integer> alvos_, int g, long tempoInicial, long tempoAtual) {
+        for (int i = 0; i < alvos_.size(); i++) {
+            Integer alvo = alvos_.get(i);
+            
+            if (this.bestChromosome.getFitnessVal() >= alvo) {
+                System.out.println("Alvo: [" + alvo + "] (Gen. " + g + ", Temp. " + ((tempoAtual - tempoInicial) / 1000D) + "s) BestSol = " + bestSol);
+                alvos_.remove(i);
+                i--;
+            }
+        }
     }
 
 }

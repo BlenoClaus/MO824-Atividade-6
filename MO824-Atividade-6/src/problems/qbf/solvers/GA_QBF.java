@@ -1,6 +1,9 @@
 package problems.qbf.solvers;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import metaheuristics.ga.AbstractGA;
 import metaheuristics.ga.Chromosome;
 import problems.qbf.QBF;
@@ -19,15 +22,14 @@ public class GA_QBF extends AbstractGA<Integer, Integer> {
      * argument for the superclass constructor.
      *
      * @param tempoExecucao
-     * @param geracoesConvengencia
      * @param popSize Size of the population.
      * @param mutationRate The mutation rate.
      * @param filename Name of the file for which the objective function
      * parameters should be read.
      * @throws IOException Necessary for I/O operations.
      */
-    public GA_QBF(Integer tempoExecucao, Integer geracoesConvengencia, Integer popSize, Double mutationRate, String filename, int crossoverType, int mutationType) throws IOException {
-        super(new QBF(filename), tempoExecucao, geracoesConvengencia, popSize, mutationRate, crossoverType, mutationType);
+    public GA_QBF(Integer tempoExecucao, List<Integer> alvos, Integer popSize, Double mutationRate, String filename, int crossoverType, int mutationType) throws IOException {
+        super(new QBF(filename), tempoExecucao, alvos, popSize, mutationRate, crossoverType, mutationType);
     }
 
     /**
@@ -119,7 +121,7 @@ public class GA_QBF extends AbstractGA<Integer, Integer> {
     public static void main(String[] args) throws IOException {
 
         long startTime = System.currentTimeMillis();
-        GA_QBF ga = new GA_QBF(30, 1000, 100, 1.0 / 100.0, "instances/qbf020", AbstractGA.DEFAULT_CROSSOVER, AbstractGA.DEFAULT_MUTATION);
+        GA_QBF ga = new GA_QBF(30, new ArrayList<>(Arrays.asList(100000)), 100, 1.0 / 100.0, "instances/qbf020", AbstractGA.DEFAULT_CROSSOVER, AbstractGA.DEFAULT_MUTATION);
         Solution<Integer> bestSol = ga.solve();
         System.out.println("maxVal = " + bestSol);
         long endTime = System.currentTimeMillis();

@@ -2,8 +2,10 @@ package problems.qbfpt.solvers;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import metaheuristics.ga.AbstractGA;
 import metaheuristics.ga.Chromosome;
 import metaheuristics.ga.AbstractGA.Population;
@@ -41,12 +43,12 @@ public class GA_QBFPT extends AbstractGA<Integer, Integer> {
 
     public boolean NO_DUPLICATES_POLICY; // -1 or zero or more: number of allowed duplicates in any population; -1 disable
 
-    public GA_QBFPT(Integer tempoExecucao, Integer geracoesConvengencia, Integer popSize, Double mutationRate, String filename, int crossoverType, int mutationType, boolean no_duplicates) throws IOException {
-        super(new QBF(filename), tempoExecucao, geracoesConvengencia, popSize, mutationRate, crossoverType, mutationType);
+    public GA_QBFPT(Integer tempoExecucao, List<Integer> alvos, Integer popSize, Double mutationRate, String filename, int crossoverType, int mutationType, boolean no_duplicates) throws IOException {
+        super(new QBF(filename), tempoExecucao, alvos, popSize, mutationRate, crossoverType, mutationType);
 
-        System.out.println("file " + filename + " tempoExec " + tempoExecucao + " geracoesConvergencia "
-                + geracoesConvengencia + " \n popSize " + this.popSize + " mutationRate " + mutationRate + " crossoverType "
-                + crossoverType + " mutationType " + mutationType + " n_duplicates " + no_duplicates);
+//        System.out.println("file " + filename + " tempoExec " + tempoExecucao + " geracoesConvergencia "
+//                + geracoesConvengencia + " \n popSize " + this.popSize + " mutationRate " + mutationRate + " crossoverType "
+//                + crossoverType + " mutationType " + mutationType + " n_duplicates " + no_duplicates);
 
         for (int i = 0; i < this.popSize; i++) {
             listIndices.add(i);
@@ -889,19 +891,31 @@ public class GA_QBFPT extends AbstractGA<Integer, Integer> {
     /**
      * A main method used for testing the GA metaheuristic.
      *
+     * @param args
+     * @throws java.io.IOException
      */
     public static void main(String[] args) throws IOException {
-
-        for (int i = 0; i < 1; i++) {
-            long startTime = System.currentTimeMillis();
-            GA_QBFPT ga = new GA_QBFPT(5, 1000000, 400, 1.0 / 100.0, "instances/qbf200", GA_QBFPT.XOR_UNIFORM_CROSSOVER, GA_QBFPT.DEFAULT_MUTATION, true);
-//            AbstractGA.verbose = false;
-
+        String instancia = "instances/qbf080";
+        int tamPop = 80;
+        int quantExec = 200;
+        int tempMaxExec = 5;
+        List<Integer> alvos = new ArrayList<>(Arrays.asList(700, 800, 830));
+        
+        System.out.println("Algoritmo Genetico\nInstancia: " + instancia);
+        
+        for (int exec = 1; exec <= quantExec; exec++) {
+            System.out.println("\nExecucao " + exec + ":");
+            
+            long tempInicial = System.currentTimeMillis();
+            
+            GA_QBFPT ga = new GA_QBFPT(tempMaxExec, alvos, tamPop, 1.0 / 100.0, instancia, GA_QBFPT.XOR_UNIFORM_CROSSOVER, GA_QBFPT.DEFAULT_MUTATION, true);
+            GA_QBFPT.verbose = false;
+            
             Solution<Integer> bestSol = ga.solve();
-            System.out.println("maxVal = " + bestSol);
-            long endTime = System.currentTimeMillis();
-            long totalTime = endTime - startTime;
-            System.out.println("Time = " + (double) totalTime / (double) 1000 + " seg");
+            
+            long tempFinal = System.currentTimeMillis();
+            
+            System.out.println("Temp. " + ((tempFinal - tempInicial) / 1000D) + "s  Max: " + bestSol.cost);
         }
 
     }
