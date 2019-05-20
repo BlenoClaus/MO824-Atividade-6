@@ -109,16 +109,17 @@ public class QBF implements Evaluator<Integer> {
         Double vecAux[] = new Double[size];
 
         for (int i = 0; i < size; i++) {
+
             for (int j = 0; j < size; j++) {
                 aux += variables[j] * A[i][j];
             }
+
             vecAux[i] = aux;
             sum += aux * variables[i];
             aux = (double) 0;
         }
 
         return sum;
-
     }
 
     /*
@@ -243,7 +244,7 @@ public class QBF implements Evaluator<Integer> {
      * @return the variation of the objective function resulting from the
      * insertion.
      */
-    private Double evaluateContributionQBF(int i) {
+    protected Double evaluateContributionQBF(int i) {
 
         Double sum = 0.0;
 
@@ -331,13 +332,10 @@ public class QBF implements Evaluator<Integer> {
      */
     public static void main(String[] args) throws IOException {
 
-        QBF qbf = new QBF("instances/qbf040");
+        QBF qbf = new QBF("matrix40");
         qbf.printMatrix();
         Double maxVal = Double.NEGATIVE_INFINITY;
 
-//		System.out.println("maxVal = " + qbf.evaluateQBF());
-//		System.out.println("size = " + qbf.variables.length);
-//		System.exit(0);
         // evaluates randomly generated values for the domain, saving the best
         // one.
         for (int i = 0; i < 10000; i++) {

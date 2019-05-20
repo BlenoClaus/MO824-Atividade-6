@@ -1,5 +1,9 @@
-package metaheuristics.grasp;
+/**
+ *
+ */
+package metaheuristics.tabusearch;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -7,13 +11,13 @@ import problems.Evaluator;
 import solutions.Solution;
 
 /**
- * Abstract class for metaheuristic GRASP (Greedy Randomized Adaptive Search
- * Procedure). It consider a minimization problem.
+ * Abstract class for metaheuristic Tabu Search. It consider a minimization
+ * problem.
  *
  * @author ccavellucci, fusberti
- * @param <E> Generic type of the element which composes the solution.
+ * @param <E> Generic type of the candidate to enter the solution.
  */
-public abstract class AbstractGRASP<E> {
+public abstract class AbstractTS<E> {
 
     /**
      * flag that indicates whether the code should print more information on
@@ -30,11 +34,6 @@ public abstract class AbstractGRASP<E> {
      * the objective function being optimized
      */
     protected Evaluator<E> ObjFunction;
-
-    /**
-     * the GRASP greediness-randomness parameter
-     */
-    protected Double alpha;
 
     /**
      * the best solution cost
@@ -57,15 +56,9 @@ public abstract class AbstractGRASP<E> {
     protected Solution<E> incumbentSol;
 
     /**
-     * tempo para execução do GRASP.
+     * the tabu tenure.
      */
-    protected Integer tempoExecucao;
-
-    /**
-     * Quantidade de iterações sem melhora para considerar a convergễncia do
-     * GRASP.
-     */
-    protected Integer iteraConvengencia;
+    protected Integer tenure;
 
     /**
      * the Candidate List of elements to enter the solution.
@@ -78,6 +71,21 @@ public abstract class AbstractGRASP<E> {
     protected ArrayList<E> RCL;
 
     /**
+     * the Tabu List of elements to enter the solution.
+     */
+    protected ArrayDeque<E> TL;
+
+    /**
+     * time minimum of execution.
+     */
+    protected Integer execTime;
+
+    /**
+     * Iteration at conversion.
+     */
+    protected Integer conversionIteration;
+
+    /**
      * Creates the Candidate List, which is an ArrayList of candidate elements
      * that can enter a solution.
      *
@@ -87,105 +95,105 @@ public abstract class AbstractGRASP<E> {
 
     /**
      * Creates the Restricted Candidate List, which is an ArrayList of the best
-     * candidate elements that can enter a solution. The best candidates are
-     * defined through a quality threshold, delimited by the GRASP
-     * {@link #alpha} greedyness-randomness parameter.
+     * candidate elements that can enter a solution.
      *
      * @return The Restricted Candidate List.
      */
     public abstract ArrayList<E> makeRCL();
 
     /**
+     * Creates the Tabu List, which is an ArrayDeque of the Tabu candidate
+     * elements. The number of iterations a candidate is considered tabu is
+     * given by the Tabu Tenure {@link #tenure}
+     *
+     * @return The Tabu List.
+     */
+    public abstract ArrayDeque<E> makeTL();
+
+    /**
      * Updates the Candidate List according to the incumbent solution
      * {@link #incumbentSol}. In other words, this method is responsible for
-     * updating which elements are still viable to take part into the solution.
+     * updating the costs of the candidate solution elements.
      */
     public abstract void updateCL();
 
     /**
      * Creates a new solution which is empty, i.e., does not contain any
-     * element.
+     * candidate solution element.
      *
      * @return An empty solution.
      */
     public abstract Solution<E> createEmptySol();
 
+    public abstract Solution<E> createRandomSol();
+
     /**
-     * The GRASP local search phase is responsible for repeatedly applying a
+     * The TS local search phase is responsible for repeatedly applying a
      * neighborhood operation while the solution is getting improved, i.e.,
-     * until a local optimum is attained.
+     * until a local optimum is attained. When a local optimum is attained the
+     * search continues by exploring moves which can make the current solution
+     * worse. Cycling is prevented by not allowing forbidden (tabu) moves that
+     * would otherwise backtrack to a previous solution.
      *
      * @return An local optimum solution.
      */
-    public abstract Solution<E> localSearch();
+    public abstract Solution<E> neighborhoodMove();
 
     /**
-     * Constructor for the AbstractGRASP class.
+     * Constructor for the AbstractTS class.
      *
      * @param objFunction The objective function being minimized.
-     * @param alpha The GRASP greediness-randomness parameter (within the range
-     * [0,1])
-     * @param iterations The number of iterations which the GRASP will be
-     * executed.
+     * @param tenure The Tabu tenure parameter.
      */
-    public AbstractGRASP(Evaluator<E> objFunction, Double alpha, Integer tempoExecucao, Integer iteraConvengencia) {
+    public AbstractTS(Evaluator<E> objFunction, Integer tenure, Integer execTime, Integer conversionIte) {
         this.ObjFunction = objFunction;
-        this.alpha = alpha;
-        this.tempoExecucao = tempoExecucao;
-        this.iteraConvengencia = iteraConvengencia;
+        this.tenure = tenure;
+        this.execTime = execTime;
+        this.conversionIteration = conversionIte;
     }
 
     /**
-     * The GRASP constructive heuristic, which is responsible for building a
-     * feasible solution by selecting in a greedy-random fashion, candidate
-     * elements to enter the solution.
+     * The TS constructive heuristic, which is responsible for building a
+     * feasible solution by selecting in a greedy fashion, candidate elements to
+     * enter the solution.
      *
      * @return A feasible solution to the problem being minimized.
      */
     public Solution<E> constructiveHeuristic() {
 
-        incumbentSol = createEmptySol();
-        incumbentCost = Double.POSITIVE_INFINITY;
-
         CL = makeCL();
         RCL = makeRCL();
-
+        incumbentSol = createEmptySol();
+        incumbentCost = Double.POSITIVE_INFINITY;
 
         /* Main loop, which repeats until the stopping criteria is reached. */
         while (!constructiveStopCriteria()) {
 
-            double maxCost = Double.NEGATIVE_INFINITY, minCost = Double.POSITIVE_INFINITY;
-            incumbentCost = ObjFunction.evaluate(incumbentSol);
+            Double maxCost = Double.NEGATIVE_INFINITY, minCost = Double.POSITIVE_INFINITY;
+            incumbentCost = incumbentSol.cost;
             updateCL();
 
-            if (CL.isEmpty()) {
-                break;
-            }
-
             /*
-            * Explore all candidate elements to enter the solution, saving the
-            * highest and lowest cost variation achieved by the candidates.
+			 * Explore all candidate elements to enter the solution, saving the
+			 * highest and lowest cost variation achieved by the candidates.
              */
             for (E c : CL) {
                 Double deltaCost = ObjFunction.evaluateInsertionCost(c, incumbentSol);
-
                 if (deltaCost < minCost) {
                     minCost = deltaCost;
                 }
-
                 if (deltaCost > maxCost) {
                     maxCost = deltaCost;
                 }
             }
 
             /*
-            * Among all candidates, insert into the RCL those with the highest
-            * performance using parameter alpha as threshold.
+			 * Among all candidates, insert into the RCL those with the highest
+			 * performance.
              */
             for (E c : CL) {
                 Double deltaCost = ObjFunction.evaluateInsertionCost(c, incumbentSol);
-
-                if (deltaCost <= minCost + alpha * (maxCost - minCost)) {
+                if (deltaCost <= minCost) {
                     RCL.add(c);
                 }
             }
@@ -204,25 +212,27 @@ public abstract class AbstractGRASP<E> {
     }
 
     /**
-     * The GRASP mainframe. It consists of a loop, in which each iteration goes
-     * through the constructive heuristic and local search. The best solution is
-     * returned as result.
+     * The TS mainframe. It consists of a constructive heuristic followed by a
+     * loop, in which each iteration a neighborhood move is performed on the
+     * current solution. The best solution is returned as result.
      *
      * @return The best feasible solution obtained throughout all iterations.
      */
     public Solution<E> solve() {
         long tempoInicial, iteracao;
-        bestSol = createEmptySol();
         int iteracoesSemMelhora = 0;
+
+        bestSol = createEmptySol();
+        constructiveHeuristic();
+        TL = makeTL();
 
         tempoInicial = System.currentTimeMillis();
         iteracao = 1;
-        while ((((System.currentTimeMillis() - tempoInicial) / 1000D) / 60D) <= this.tempoExecucao) {
+        while ((((System.currentTimeMillis() - tempoInicial) / 1000.0) / 60.0) <= this.execTime) {
             iteracao++;
             iteracoesSemMelhora++;
 
-            constructiveHeuristic();
-            localSearch();
+            neighborhoodMove();
 
             if (bestSol.cost > incumbentSol.cost) {
                 bestSol = new Solution<E>(incumbentSol);
@@ -233,7 +243,7 @@ public abstract class AbstractGRASP<E> {
                 }
             }
 
-            if (this.iteraConvengencia > 0 && iteracoesSemMelhora > this.iteraConvengencia) {
+            if (this.conversionIteration > 0 && iteracoesSemMelhora > this.conversionIteration) {
                 break;
             }
         }

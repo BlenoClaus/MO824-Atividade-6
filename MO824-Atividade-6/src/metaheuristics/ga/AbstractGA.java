@@ -169,7 +169,7 @@ public abstract class AbstractGA<G extends Number, F> {
          * enters the main loop and repeats until a given number of generations
          */
         tempoInicial = System.currentTimeMillis();
-        for (int g = 1; (((System.currentTimeMillis() - tempoInicial) / 1000) / 60) <= this.tempoExecucao && (this.geracoesConvengencia < 1 || geracoesSemMelhora <= this.geracoesConvengencia); g++) {
+        for (int g = 1; (((System.currentTimeMillis() - tempoInicial) / 1000D) / 60D) < this.tempoExecucao && (this.geracoesConvengencia < 1 || geracoesSemMelhora <= this.geracoesConvengencia); g++) {
             geracoesSemMelhora++;
 
             Population parents = selectParents(population);
@@ -188,7 +188,7 @@ public abstract class AbstractGA<G extends Number, F> {
                 bestSol = decode(bestChromosome);
 
                 if (verbose) {
-                    System.out.println("(Gen. " + g + ", Temp. " + ((System.currentTimeMillis() - tempoInicial) / 1000) + "s) BestSol = " + bestSol);
+                    System.out.println("(Gen. " + g + ", Temp. " + ((System.currentTimeMillis() - tempoInicial) / 1000D) + "s) BestSol = " + bestSol);
                 }
 
                 geracoesSemMelhora = 0;
