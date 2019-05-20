@@ -3,6 +3,8 @@ package problems.qbf.solvers;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import metaheuristics.tabusearch.AbstractTS;
 import problems.qbf.QBF_Inverse;
@@ -29,8 +31,8 @@ public class TS_QBF extends AbstractTS<Integer> {
      * parameters should be read.
      * @throws IOException necessary for I/O operations.
      */
-    public TS_QBF(Integer tenure, String filename, Integer execTime, Integer conversionIte) throws IOException {
-        super(new QBF_Inverse(filename), tenure, execTime, conversionIte);
+    public TS_QBF(Integer tenure, String filename, Integer execTime, List<Integer> alvos) throws IOException {
+        super(new QBF_Inverse(filename), tenure, execTime, alvos);
     }
 
     /* (non-Javadoc)
@@ -177,7 +179,7 @@ public class TS_QBF extends AbstractTS<Integer> {
     public static void main(String[] args) throws IOException {
 
         long startTime = System.currentTimeMillis();
-        TS_QBF tabusearch = new TS_QBF(20, "instances/qbf100", 30, 10000);
+        TS_QBF tabusearch = new TS_QBF(20, "instances/qbf100", 30, Arrays.asList(10000));
         Solution<Integer> bestSol = tabusearch.solve();
         System.out.println("maxVal = " + bestSol);
         long endTime = System.currentTimeMillis();

@@ -5,6 +5,7 @@ package metaheuristics.tabusearch;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import problems.Evaluator;
@@ -85,6 +86,8 @@ public abstract class AbstractTS<E> {
      */
     protected Integer conversionIteration;
 
+    protected List<Integer> alvos;
+
     /**
      * Creates the Candidate List, which is an ArrayList of candidate elements
      * that can enter a solution.
@@ -145,11 +148,11 @@ public abstract class AbstractTS<E> {
      * @param objFunction The objective function being minimized.
      * @param tenure The Tabu tenure parameter.
      */
-    public AbstractTS(Evaluator<E> objFunction, Integer tenure, Integer execTime, Integer conversionIte) {
+    public AbstractTS(Evaluator<E> objFunction, Integer tenure, Integer execTime, List<Integer> alvos) {
         this.ObjFunction = objFunction;
         this.tenure = tenure;
         this.execTime = execTime;
-        this.conversionIteration = conversionIte;
+        this.alvos = alvos;
     }
 
     /**
@@ -219,16 +222,20 @@ public abstract class AbstractTS<E> {
      * @return The best feasible solution obtained throughout all iterations.
      */
     public Solution<E> solve() {
-        long tempoInicial, iteracao;
+        long tempoInicial;
+        int iteracao;
         int iteracoesSemMelhora = 0;
+        List<Integer> alvos_ = new ArrayList<>(this.alvos);
+        tempoInicial = System.currentTimeMillis();
 
         bestSol = createEmptySol();
         constructiveHeuristic();
         TL = makeTL();
+        
+        verificarAlvos(alvos_, 0, tempoInicial, tempoInicial);
 
-        tempoInicial = System.currentTimeMillis();
         iteracao = 1;
-        while ((((System.currentTimeMillis() - tempoInicial) / 1000.0) / 60.0) <= this.execTime) {
+        while ((((System.currentTimeMillis() - tempoInicial) / 1000.0) / 60.0) <= this.execTime && !alvos_.isEmpty()) {
             iteracao++;
             iteracoesSemMelhora++;
 
@@ -243,9 +250,7 @@ public abstract class AbstractTS<E> {
                 }
             }
 
-            if (this.conversionIteration > 0 && iteracoesSemMelhora > this.conversionIteration) {
-                break;
-            }
+            verificarAlvos(alvos_, iteracao, tempoInicial, System.currentTimeMillis());
         }
 
         return bestSol;
@@ -260,6 +265,18 @@ public abstract class AbstractTS<E> {
      */
     public Boolean constructiveStopCriteria() {
         return (incumbentCost > incumbentSol.cost) ? false : true;
+    }
+
+    private void verificarAlvos(List<Integer> alvos_, int g, long tempoInicial, long tempoAtual) {
+        for (int i = 0; i < alvos_.size(); i++) {
+            Integer alvo = alvos_.get(i);
+
+            if (Math.abs(this.bestSol.cost) >= alvo) {
+                System.out.println("Alvo: [" + alvo + "] (Ite. " + g + ", Temp. " + ((tempoAtual - tempoInicial) / 1000D) + "s) BestSol = " + bestSol);
+                alvos_.remove(i);
+                i--;
+            }
+        }
     }
 
 }

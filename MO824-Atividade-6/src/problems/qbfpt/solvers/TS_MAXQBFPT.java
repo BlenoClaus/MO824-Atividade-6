@@ -3,8 +3,10 @@ package problems.qbfpt.solvers;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import metaheuristics.tabusearch.AbstractTS;
 import problems.qbf.QBF_Inverse;
@@ -39,8 +41,8 @@ public class TS_MAXQBFPT extends AbstractTS<Integer> {
      * parameters should be read.
      * @throws IOException necessary for I/O operations.
      */
-    public TS_MAXQBFPT(Integer tenure, String filename, Integer execTime, Integer conversionIte) throws IOException {
-        super(new QBF_Inverse(filename), tenure, execTime, conversionIte);
+    public TS_MAXQBFPT(Integer tenure, String filename, Integer execTime, List<Integer> alvos) throws IOException {
+        super(new QBF_Inverse(filename), tenure, execTime, alvos);
 
         generateTripleElements();
         generateTriples();
@@ -342,14 +344,26 @@ public class TS_MAXQBFPT extends AbstractTS<Integer> {
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws IOException {
+        String instancia = "instances/qbf080";
+        int quantExec = 200;
+        int tempMaxExec = 5;
+        List<Integer> alvos = new ArrayList<>(Arrays.asList(700, 800, 830));
 
-        long startTime = System.currentTimeMillis();
-        TS_MAXQBFPT tabusearch = new TS_MAXQBFPT(10, "instances/qbf200", 5, 1000000);
-        Solution<Integer> bestSol = tabusearch.solve();
-        System.out.println("maxVal = " + bestSol);
-        long endTime = System.currentTimeMillis();
-        long totalTime = endTime - startTime;
-        System.out.println("Time = " + (double) totalTime / (double) 1000 + " seg");
+        System.out.println("Algoritmo Busca Tabu\nInstancia: " + instancia);
+
+        for (int exec = 1; exec <= quantExec; exec++) {
+            System.out.println("\nExecucao " + exec + ":");
+
+            long tempInicial = System.currentTimeMillis();
+
+            TS_MAXQBFPT tabusearch = new TS_MAXQBFPT(10, instancia, tempMaxExec, alvos);
+            TS_MAXQBFPT.verbose = false;
+            Solution<Integer> bestSol = tabusearch.solve();
+
+            long tempFinal = System.currentTimeMillis();
+
+            System.out.println("Temp. " + ((tempFinal - tempInicial) / 1000D) + "s  Max: " + bestSol.cost);
+        }
 
     }
 
