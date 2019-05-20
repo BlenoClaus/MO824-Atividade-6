@@ -2,6 +2,8 @@ package problems.qbf.solvers;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import localSearch.LocalSearchOperation;
@@ -29,13 +31,12 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
      * [0,1])
      * @param firstImproving
      * @param tempoExecucao
-     * @param iteraConvengencia
      * @param filename Name of the file for which the objective function
      * parameters should be read.
      * @throws IOException necessary for I/O operations.
      */
-    public GRASP_QBF(Double alpha, Boolean firstImproving, Integer tempoExecucao, Integer iteraConvengencia, String filename) throws IOException {
-        super(new QBF_Inverse(filename), alpha, tempoExecucao, iteraConvengencia);
+    public GRASP_QBF(Double alpha, Boolean firstImproving, Integer tempoExecucao, List<Integer> alvos, String filename) throws IOException {
+        super(new QBF_Inverse(filename), alpha, tempoExecucao, alvos);
 
         this.firstImproving = firstImproving;
     }
@@ -198,15 +199,15 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
     public static void main(String[] args) throws IOException {
 
         long startTime = System.currentTimeMillis();
-        GRASP_QBF grasp = new GRASP_QBF(0.05, false, 30, 100, "instances/qbf020");
+        GRASP_QBF grasp = new GRASP_QBF(0.05, false, 30, Arrays.asList(10000), "instances/qbf020");
 
-        Solution<Integer> bestSol = grasp.solve();
+            Solution<Integer> bestSol = grasp.solve();
 
         System.out.println("maxVal = " + bestSol);
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
         System.out.println("Time = " + (double) totalTime / (double) 1000 + " seg");
 
-    }
+        }
 
-}
+    }

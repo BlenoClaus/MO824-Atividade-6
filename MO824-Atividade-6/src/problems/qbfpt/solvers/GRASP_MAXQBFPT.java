@@ -7,6 +7,8 @@ import java.util.Comparator;
 import java.util.Random;
 
 import alternativeConstruction.ReactiveAlpha;
+import java.util.Arrays;
+import java.util.List;
 import problems.qbf.solvers.GRASP_QBF;
 import solutions.Solution;
 import triple.Triple;
@@ -65,17 +67,14 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
      * @param firstImproving If the local search strategy will be First
      * Improving, otherwise it will be Best Improving.
      * @param timeLimite Timeout in minutes for the execution of the algorithm.
-     * @param iterationsLimit Number of iterations without solution improvement
-     * until considering the convergence of the algorithm. If a negative value
-     * is used only the execution time will be considered as a stop criterion.
      * @param filename Local or complete path of the file with the coefficients
      * of that instance of the problem.
      * @throws IOException Generates an exception if the file with the
      * coefficients does not exist.
      */
-    public GRASP_MAXQBFPT(Double alpha, int contructionMechanism, Boolean firstImproving, Integer timeLimite, Integer iterationsLimit, String filename) throws IOException {
+    public GRASP_MAXQBFPT(Double alpha, int contructionMechanism, Boolean firstImproving, Integer timeLimite, List<Integer> alvos, String filename) throws IOException {
 
-        super(alpha, firstImproving, timeLimite, iterationsLimit, filename);
+        super(alpha, firstImproving, timeLimite, alvos, filename);
         this.contructionMechanism = contructionMechanism;
         this.bestSolConstHeurist = new Solution<>();
 
@@ -400,16 +399,26 @@ public class GRASP_MAXQBFPT extends GRASP_QBF {
     }
 
     public static void main(String[] args) throws IOException {
-        long beginInstanceTime = System.currentTimeMillis();
-
-        GRASP_MAXQBFPT grasp = new GRASP_MAXQBFPT(0.05, GRASP_MAXQBFPT.STANDARD, true, 5, 1000000, "instances/qbf200");
-        Solution<Integer> bestSolution = grasp.solve();
-        System.out.println(" maxVal = " + bestSolution);
-        System.out.println(" construction = " + grasp.getBestSolConstHeurist().cost);
-
-        long endInstanceTime = System.currentTimeMillis();
-        long totalInstanceTime = endInstanceTime - beginInstanceTime;
-        System.out.println("Time = " + (double) totalInstanceTime / (double) 1000 + " seg");
+        String instancia = "instances/qbf080";
+        int quantExec = 200;
+        int tempMaxExec = 5;
+        List<Integer> alvos = new ArrayList<>(Arrays.asList(700, 800, 830));
+        
+        System.out.println("Algoritmo GRASP\nInstancia: " + instancia);
+        
+        for (int exec = 1; exec <= quantExec; exec++) {
+            System.out.println("\nExecucao " + exec + ":");
+            
+            long tempInicial = System.currentTimeMillis();
+            
+            GRASP_MAXQBFPT grasp = new GRASP_MAXQBFPT(0.05, GRASP_MAXQBFPT.STANDARD, false, tempMaxExec, alvos, instancia);
+            GRASP_MAXQBFPT.verbose = false;
+            Solution<Integer> bestSol = grasp.solve();
+            
+            long tempFinal = System.currentTimeMillis();
+            
+            System.out.println("Temp. " + ((tempFinal - tempInicial) / 1000D) + "s  Max: " + bestSol.cost);
+        }
 
     }
 

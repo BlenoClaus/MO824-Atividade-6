@@ -1,6 +1,7 @@
 package metaheuristics.grasp;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import problems.Evaluator;
@@ -66,6 +67,8 @@ public abstract class AbstractGRASP<E> {
      * GRASP.
      */
     protected Integer iteraConvengencia;
+    
+    protected List<Integer> alvos;
 
     /**
      * the Candidate List of elements to enter the solution.
@@ -125,14 +128,12 @@ public abstract class AbstractGRASP<E> {
      * @param objFunction The objective function being minimized.
      * @param alpha The GRASP greediness-randomness parameter (within the range
      * [0,1])
-     * @param iterations The number of iterations which the GRASP will be
-     * executed.
      */
-    public AbstractGRASP(Evaluator<E> objFunction, Double alpha, Integer tempoExecucao, Integer iteraConvengencia) {
+    public AbstractGRASP(Evaluator<E> objFunction, Double alpha, Integer tempoExecucao, List<Integer> alvos) {
         this.ObjFunction = objFunction;
         this.alpha = alpha;
         this.tempoExecucao = tempoExecucao;
-        this.iteraConvengencia = iteraConvengencia;
+        this.alvos = alvos;
     }
 
     /**
@@ -211,13 +212,18 @@ public abstract class AbstractGRASP<E> {
      * @return The best feasible solution obtained throughout all iterations.
      */
     public Solution<E> solve() {
-        long tempoInicial, iteracao;
+        long tempoInicial;
+        int iteracao;
         bestSol = createEmptySol();
         int iteracoesSemMelhora = 0;
+        List<Integer> alvos_ = new ArrayList<>(this.alvos);
 
         tempoInicial = System.currentTimeMillis();
         iteracao = 1;
-        while ((((System.currentTimeMillis() - tempoInicial) / 1000D) / 60D) <= this.tempoExecucao) {
+        
+        verificarAlvos(alvos_, 0, tempoInicial, tempoInicial);
+        
+        while ((((System.currentTimeMillis() - tempoInicial) / 1000D) / 60D) <= this.tempoExecucao && !alvos_.isEmpty()) {
             iteracao++;
             iteracoesSemMelhora++;
 
@@ -233,9 +239,12 @@ public abstract class AbstractGRASP<E> {
                 }
             }
 
-            if (this.iteraConvengencia > 0 && iteracoesSemMelhora > this.iteraConvengencia) {
-                break;
-            }
+            verificarAlvos(alvos_, iteracao, tempoInicial, System.currentTimeMillis());
+        }
+        
+        // Caso não tenha chegado em algum alvo
+        for (Integer alvo : alvos_) {
+            System.out.println("Alvo: [" + alvo + "]");
         }
 
         return bestSol;
@@ -250,6 +259,18 @@ public abstract class AbstractGRASP<E> {
      */
     public Boolean constructiveStopCriteria() {
         return (incumbentCost > incumbentSol.cost) ? false : true;
+    }
+    
+    private void verificarAlvos(List<Integer> alvos_, int g, long tempoInicial, long tempoAtual) {
+        for (int i = 0; i < alvos_.size(); i++) {
+            Integer alvo = alvos_.get(i);
+            
+            if (Math.abs(this.bestSol.cost) >= alvo) {
+                System.out.println("Alvo: [" + alvo + "] (Ite. " + g + ", Temp. " + ((tempoAtual - tempoInicial) / 1000D) + "s) BestSol = " + bestSol);
+                alvos_.remove(i);
+                i--;
+            }
+        }
     }
 
 }
