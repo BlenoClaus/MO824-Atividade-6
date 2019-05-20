@@ -30,7 +30,7 @@ public class TS_MAXQBFPT extends AbstractTS<Integer> {
 
     private Triple[] triples;
 
-    private boolean first = true;
+    private boolean first;
 
     /**
      * Constructor for the TS_QBF class.An inverse QBF objective function is
@@ -41,8 +41,10 @@ public class TS_MAXQBFPT extends AbstractTS<Integer> {
      * parameters should be read.
      * @throws IOException necessary for I/O operations.
      */
-    public TS_MAXQBFPT(Integer tenure, String filename, Integer execTime, List<Integer> alvos) throws IOException {
+    public TS_MAXQBFPT(Integer tenure, boolean firstImproving, String filename, Integer execTime, List<Integer> alvos) throws IOException {
         super(new QBF_Inverse(filename), tenure, execTime, alvos);
+        
+        this.first = firstImproving;
 
         generateTripleElements();
         generateTriples();
@@ -356,7 +358,7 @@ public class TS_MAXQBFPT extends AbstractTS<Integer> {
 
             long tempInicial = System.currentTimeMillis();
 
-            TS_MAXQBFPT tabusearch = new TS_MAXQBFPT(10, instancia, tempMaxExec, alvos);
+            TS_MAXQBFPT tabusearch = new TS_MAXQBFPT(10, true, instancia, tempMaxExec, alvos);
             TS_MAXQBFPT.verbose = false;
             Solution<Integer> bestSol = tabusearch.solve();
 
