@@ -1,0 +1,40 @@
+
+Gurobi 7.0.2 (linux64, Java) logging started Mon 20 May 2019 10:31:19 PM -03
+
+Optimize a model with 20 rows, 20 columns and 60 nonzeros
+Model has 200 quadratic objective terms
+Variable types: 0 continuous, 20 integer (20 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [0e+00, 0e+00]
+  QObjective range [2e+00, 2e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Found heuristic solution: objective -0
+Modified 20 Q diagonals
+Presolve time: 0.00s
+Presolved: 20 rows, 20 columns, 60 nonzeros
+Presolved model has 201 quadratic objective terms
+Variable types: 0 continuous, 20 integer (20 binary)
+
+Root relaxation: objective 2.688425e+02, 24 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  268.84247    0   20   -0.00000  268.84247      -     -    0s
+H    0     0                      51.0000000  268.84247   427%     -    0s
+H    0     0                      95.0000000  268.84247   183%     -    0s
+H    0     0                     116.0000000  268.84247   132%     -    0s
+     0     2  268.84247    0   20  116.00000  268.84247   132%     -    0s
+H   33    32                     118.0000000  230.89256  95.7%   2.8    0s
+H   76    51                     125.0000000  210.85871  68.7%   2.9    0s
+
+Explored 1027 nodes (2941 simplex iterations) in 0.03 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 6: 125 118 116 ... -0
+Pool objective bound 125
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.250000000000e+02, best bound 1.250000000000e+02, gap 0.0000%

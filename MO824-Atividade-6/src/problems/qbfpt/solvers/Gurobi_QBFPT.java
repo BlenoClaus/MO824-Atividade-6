@@ -55,6 +55,32 @@ public class Gurobi_QBFPT extends Gurobi_QBF {
     model.set(GRB.IntAttr.ModelSense, GRB.MAXIMIZE);
 	}
 	
+	
+	public static void run (String logName, String instance, double time) {
+		Gurobi_QBFPT gurobi;
+		try {
+			gurobi = new Gurobi_QBFPT(instance);
+			env = new GRBEnv(logName+".log");
+			model = new GRBModel(env);
+			model.getEnv().set(GRB.DoubleParam.TimeLimit, time);
+			gurobi.populateNewModel(model);
+			model.write(logName+".lp");
+			model.optimize();
+			System.out.println("\n\nZ* = " + model.get(GRB.DoubleAttr.ObjVal));
+			System.out.print("X = [");
+			for (int i = 0; i < gurobi.problem.size; i++) {
+				System.out.print((gurobi.x[i].get(GRB.DoubleAttr.X) > 0.5 ? 1.0 : 0) + ", ");
+			}
+			System.out.print("]");
+			model.dispose();
+			env.dispose();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (GRBException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void main(String[] args) {
 
     // instance name
