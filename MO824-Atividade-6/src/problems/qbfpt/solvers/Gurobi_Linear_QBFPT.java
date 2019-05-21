@@ -13,11 +13,12 @@ import problems.qbf.solvers.Gurobi_QBF;
 import triple.forbidden.ForbiddenTriplesBuilder;
 import triple.forbidden.Triple;
 
-public class Gurobi_QBFPT extends Gurobi_QBF {
+public class Gurobi_Linear_QBFPT extends Gurobi_QBF {
 
 	private ForbiddenTriplesBuilder ftBuilder;
+	private GRBVar[][] w;
 
-	public Gurobi_QBFPT(String filename) throws IOException {
+	public Gurobi_Linear_QBFPT(String filename) throws IOException {
 		super(filename);
 		ftBuilder = new ForbiddenTriplesBuilder(problem.size);
 	}
@@ -25,9 +26,13 @@ public class Gurobi_QBFPT extends Gurobi_QBF {
 	protected void populateNewModel(GRBModel model) throws GRBException {
     // variables
     x = new GRBVar[problem.size];
+    w = new GRBVar[problem.size][problem.size];
 
     for (int i = 0; i < problem.size; i++) {
         x[i] = model.addVar(0, 1, 0.0f, GRB.BINARY, "x[" + i + "]");
+        for (int j = 0; j < problem.size; j++) {
+        	w[i][j] = model.addVar(0, 1, 0.0f, GRB.BINARY, "w["+i+","+j+"]");
+        }
     }
     model.update();
 
@@ -35,21 +40,40 @@ public class Gurobi_QBFPT extends Gurobi_QBF {
     GRBQuadExpr obj = new GRBQuadExpr();
     for (int i = 0; i < problem.size; i++) {
         for (int j = i; j < problem.size; j++) {
-            obj.addTerm(problem.A[i][j], x[i], x[j]);
+            obj.addTerm(problem.A[i][j], w[i][j]);
         }
     }
     
     model.setObjective(obj);
     model.update();
     
-    GRBLinExpr expr;
+    GRBLinExpr expr1;
     for (Triple triple : ftBuilder.getForbiddenTriple()) {
-    	expr = new GRBLinExpr();
-    	expr.addTerm(1, x[triple.getX()-1]);
-    	expr.addTerm(1, x[triple.getY()-1]);
-    	expr.addTerm(1, x[triple.getZ()-1]);
-    	model.addConstr(expr, GRB.LESS_EQUAL, 2.0, String.valueOf("x_"+triple.getX()+","+triple.getY()+","+triple.getZ()));
+    	expr1 = new GRBLinExpr();
+    	expr1.addTerm(1, x[triple.getX()-1]);
+    	expr1.addTerm(1, x[triple.getY()-1]);
+    	expr1.addTerm(1, x[triple.getZ()-1]);
+    	model.addConstr(expr1, GRB.LESS_EQUAL, 2.0, String.valueOf("x_"+triple.getX()+","+triple.getY()+","+triple.getZ()));
     }
+    
+    model.update();
+    
+    GRBLinExpr expr2, expr3;
+    for (int i = 0; i < problem.size; i++) {
+      for (int j = i; j < problem.size; j++) {
+      	expr2 = new GRBLinExpr();
+      	expr2.addTerm(1, w[i][j]);
+      	model.addConstr(expr2, GRB.LESS_EQUAL, x[i], String.valueOf("(i)w_"+i+","+j+"<=x_"+i));
+      	model.addConstr(expr2, GRB.LESS_EQUAL, x[j], String.valueOf("(j)w_"+i+","+j+"<=x_"+j));
+      	expr3 = new GRBLinExpr();
+      	expr3.addTerm(-1, w[i][j]);
+      	expr3.addTerm(1, x[i]);
+      	expr3.addTerm(1, x[j]);      	
+      	model.addConstr(expr3, GRB.LESS_EQUAL, 1, String.valueOf("-w_"+i+","+j+"+x_"+i+","+j+"+x_"+i+","+j+"<=1"));
+      }
+    }
+    model.update();
+    
 
     // maximization objective function
     model.set(GRB.IntAttr.ModelSense, GRB.MAXIMIZE);
@@ -58,10 +82,10 @@ public class Gurobi_QBFPT extends Gurobi_QBF {
 	public static void main(String[] args) {
 
     // instance name
-		Gurobi_QBFPT gurobi;
+		Gurobi_Linear_QBFPT gurobi;
 		try {
-			gurobi = new Gurobi_QBFPT("instances/qbf020");
-			env = new GRBEnv("mip_qbfpt_1.log");
+			gurobi = new Gurobi_Linear_QBFPT("instances/qbf040");
+			env = new GRBEnv("mip_qbfpt_2.log");
 			model = new GRBModel(env);
 			
 			// execution time in seconds 
@@ -71,7 +95,7 @@ public class Gurobi_QBFPT extends Gurobi_QBF {
 			gurobi.populateNewModel(model);
 			
 			// write model to file
-			model.write("model_qbfpt_1.lp");
+			model.write("model_qbfpt_2.lp");
 			
 			model.optimize();
 			
