@@ -23,7 +23,7 @@ public class Gurobi_QBF {
     public static void main(String[] args) throws IOException, GRBException {
 
         // instance name
-        Gurobi_QBF gurobi = new Gurobi_QBF("instances/qbf400");
+        Gurobi_QBF gurobi = new Gurobi_QBF("instances/qbf020");
 
         env = new GRBEnv("mip1.log");
         model = new GRBModel(env);
@@ -51,8 +51,9 @@ public class Gurobi_QBF {
         env.dispose();
 
     }
+    
 
-    private void populateNewModel(GRBModel model) throws GRBException {
+    protected void populateNewModel(GRBModel model) throws GRBException {
 
         // variables
         x = new GRBVar[problem.size];
@@ -75,6 +76,8 @@ public class Gurobi_QBF {
 
         // maximization objective function
         model.set(GRB.IntAttr.ModelSense, -1);
+        
+        
 
     }
 
