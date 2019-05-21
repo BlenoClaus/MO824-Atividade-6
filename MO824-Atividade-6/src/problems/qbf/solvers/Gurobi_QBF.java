@@ -1,6 +1,7 @@
 package problems.qbf.solvers;
 
 import java.io.IOException;
+
 import gurobi.GRB;
 import gurobi.GRBEnv;
 import gurobi.GRBException;
@@ -51,7 +52,6 @@ public class Gurobi_QBF {
         env.dispose();
 
     }
-    
 
     protected void populateNewModel(GRBModel model) throws GRBException {
 
